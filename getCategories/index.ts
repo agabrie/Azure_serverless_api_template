@@ -20,10 +20,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
     const querySpec = {
        text:
        `
-       SELECT * FROM Contacts
-       INNER JOIN Categories
-       ON Contacts.category_id = Categories.id
-       WHERE Contacts.category_id = ${category_id}
+       SELECT * FROM Categories
        `,
        values:[category_id]
     }
@@ -36,7 +33,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
         const client = await sql.connect(config);
 
         // Execute the query against the client
-        const result = await client.query(querySpec);
+        const result = await client.query(querySpec.text);
 
         // Release the connection
         sql.close();

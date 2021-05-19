@@ -1,26 +1,42 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions"
 
+
 const sql = require('mssql');
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
+    // const client = df.getClient(context);
+    // const instanceId = await client.startNew('TestOrchestrator', undefined, req.body);
+
+    // context.log(`Started orchestration with ID = '${instanceId}'.`);
+
+    // return client.createCheckStatusResponse(context.bindingData.req, instanceId);
+
     const config = {
-        server: process.env["dbhost"],
-        user: process.env["dbuser"],
-        password: process.env["dbpassword"],
-        database: process.env["dbname"],
-        port: process.env["dbport"],
-        encrypt: process.env["dbencrypt"],
+        server: (String)(process.env["dbhost"]),
+        user: (String)(process.env["dbuser"]),
+        password: (String)(process.env["dbpassword"]),
+        database: (String)(process.env["dbname"]),
+        port: (Number)(process.env["dbport"]),
+        options: {
+            // encrypt: true, // for azure
+            encrypt: (Boolean) (process.env["dbencrypt"]),
+            trustServerCertificate: true // change to true for local dev / self-signed certs
+        }
         // ssl: process.env["ssl"]
     };
 
    const querySpec = {
        text:
-       `
-       DROP TABLE Contacts;
-       DROP TABLE Users;
-       DROP TABLE Categories;
-       DROP TABLE Roles;
-       `
+        `
+        IF (EXISTS (SELECT * FROM sys.tables WHERE name='companies'))
+            DROP TABLE companies;
+        IF (EXISTS (SELECT * FROM sys.tables WHERE name='users'))
+            DROP TABLE users;
+        IF (EXISTS (SELECT * FROM sys.tables WHERE name='categories'))
+            DROP TABLE categories;
+        IF (EXISTS (SELECT * FROM sys.tables WHERE name='roles'))
+            DROP TABLE roles;
+        `
     }
 
     try {

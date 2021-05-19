@@ -4,12 +4,16 @@ const sql = require('mssql');
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
     const config = {
-        server: process.env["dbhost"],
-        user: process.env["dbuser"],
-        password: process.env["dbpassword"],
-        database: process.env["dbname"],
-        port: process.env["dbport"],
-        encrypt: process.env["dbencrypt"],
+        server: (String)(process.env["dbhost"]),
+        user: (String)(process.env["dbuser"]),
+        password: (String)(process.env["dbpassword"]),
+        database: (String)(process.env["dbname"]),
+        port: (Number)(process.env["dbport"]),
+        options: {
+            // encrypt: true, // for azure
+            encrypt: (Boolean) (process.env["dbencrypt"]),
+            trustServerCertificate: true // change to true for local dev / self-signed certs
+        }
         // ssl: process.env["ssl"]
     };
 

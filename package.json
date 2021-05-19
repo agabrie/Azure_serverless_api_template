@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@types/node": "^15.0.2",
+    "bcrypt": "^5.0.1",
+    "durable-functions": "^1.4.6",
     "mssql": "^7.0.0",
     "pg": "^8.6.0"
   },
