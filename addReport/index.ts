@@ -1,10 +1,8 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions"
 
-
 const sql = require('mssql');
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
-
     const config = {
         server: (String)(process.env["dbhost"]),
         user: (String)(process.env["dbuser"]),
@@ -18,29 +16,25 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
         }
         // ssl: process.env["ssl"]
     };
+    let role_id: number = (req.query.role_id || (req.body && req.body.role_id)) || null;
+    let company_id: number = (req.query.category_id || (req.body && req.body.category_id)) || null;
+    let url: string = (req.query.url || (req.body && req.body.url)) || null;
+    let description: string = (req.query.description || (req.body && req.body.description)) || null;
 
-   const querySpec = {
+    const querySpec = {
        text:
-        `
-        IF (EXISTS (SELECT * FROM sys.tables WHERE name='contacts'))
-            DROP TABLE contacts;
-        IF (EXISTS (SELECT * FROM sys.tables WHERE name='companies'))
-            DROP TABLE companies;
-        IF (EXISTS (SELECT * FROM sys.tables WHERE name='users'))
-            DROP TABLE users;
-        IF (EXISTS (SELECT * FROM sys.tables WHERE name='categories'))
-            DROP TABLE categories;
-        IF (EXISTS (SELECT * FROM sys.tables WHERE name='roles'))
-            DROP TABLE roles;
-        `
+       `
+       INSERT INTO reports(role_id, company_id, url, description) VALUES ('${role_id}','${company_id}','${url}','${description}')
+       `,
+    //    values:[category_id]
     }
 
     try {
         // Create a pool of connections
-        const client = await sql.connect(config);
+        // const pool = new pg.Pool(config);
 
         // Get a new client connection from the pool
-        // const client = await pool.connect();
+        const client = await sql.connect(config);
 
         // Execute the query against the client
         const result = await client.query(querySpec.text);

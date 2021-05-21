@@ -27,7 +27,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
     // context.log(req.body,req.query);
     // const contacts = req.body;
     const querySpec = {
-        text: `INSERT INTO contacts(name,category_id) values (${name},${category_id})`,
+        text: `INSERT INTO companies(name,category_id) values (${name},${category_id})`,
         values: [name,category_id]
     }
     

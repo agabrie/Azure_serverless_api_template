@@ -5,8 +5,8 @@
 			"type": "httpTrigger",
 			"direction": "in",
 			"name": "req",
-			"route": "contacts",
-			"methods": ["get"]
+			"route": "users/user/{user_id}",
+			"methods": ["get", "post"]
 		},
     {
       "type": "http",
@@ -14,5 +14,5 @@
       "name": "res"
     }
   ],
-  "scriptFile": "../dist/getUsers/index.js"
+  "scriptFile": "../dist/getUser/index.js"
 }

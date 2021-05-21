@@ -1,22 +1,11 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions"
-
+var { getConfig, getSequelize }  = require('../shared/config.js');
+const sequelize = getSequelize();
 const sql = require('mssql');
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
-    const config = {
-        server: (String)(process.env["dbhost"]),
-        user: (String)(process.env["dbuser"]),
-        password: (String)(process.env["dbpassword"]),
-        database: (String)(process.env["dbname"]),
-        port: (Number)(process.env["dbport"]),
-        options: {
-            // encrypt: true, // for azure
-            encrypt: (Boolean) (process.env["dbencrypt"]),
-            trustServerCertificate: true // change to true for local dev / self-signed certs
-        }
-        // ssl: process.env["ssl"]
-    };
-
+    const config = getConfig();
+    sequelize.sync();
    const querySpec = {
        text:
        `
@@ -45,6 +34,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
                     username VARCHAR(64) NOT NULL UNIQUE,
                     email VARCHAR(128) NOT NULL UNIQUE,
                     password VARCHAR(64) NOT NULL,
+                    token VARCHAR(64) NOT NULL,
                     role_id int,
                     CONSTRAINT fk_role FOREIGN KEY(role_id) REFERENCES roles(id)
                 );
@@ -56,12 +46,34 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
                     id INT NOT NULL IDENTITY(1,1) PRIMARY KEY,
                     name VARCHAR(64) NOT NULL,
                     category_id int,
-                    user_id int,
                     CONSTRAINT fk_category FOREIGN KEY(category_id) REFERENCES Categories(id),
+                );
+            END;
+
+        if (not exists (select * from sys.tables where name='contacts'))
+            BEGIN
+                CREATE TABLE contacts(
+                    id INT NOT NULL IDENTITY(1,1) PRIMARY KEY,
+                    company_id int,
+                    user_id int,
+                    CONSTRAINT fk_company FOREIGN KEY(company_id) REFERENCES Companies(id),
                     CONSTRAINT fk_user FOREIGN KEY(user_id) REFERENCES Users(id)
                 );
             END;
 
+        if (not exists (select * from sys.tables where name='reports'))
+            BEGIN
+                CREATE TABLE reports(
+                    id INT NOT NULL IDENTITY(1,1) PRIMARY KEY,
+                    company_id int,
+                    role_id int,
+                    url VARCHAR(64) NOT NULL,
+                    description VARCHAR(128),
+                    CONSTRAINT fk_company FOREIGN KEY(company_id) REFERENCES Companies(id),
+                    CONSTRAINT fk_role FOREIGN KEY(role_id) REFERENCES roles(id)
+                );
+            END;
+        
         IF(NOT EXISTS(SELECT 1 FROM categories))
             BEGIN
                 INSERT INTO Categories(type) VALUES ('Growers');

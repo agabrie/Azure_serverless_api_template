@@ -15,51 +15,58 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
             trustServerCertificate: true // change to true for local dev / self-signed certs
         }
     };
-    let user_login: string = (req.query.user_login || (req.body && req.body.user_login));
+    let token: string = (req.query.token || (req.body && req.body.token));
+    let user_id: string = (req.query.user_id || (req.body && req.body.user_id));
 
     let password: string = (req.query.password || (req.body && req.body.password));
 
    const querySpec = {
        text:
         `
-        SELECT TOP 1 * FROM users WHERE (username='${user_login}' OR email='${user_login}');
-        `        
+        IF (NOT EXISTS(SELECT * FROM users WHERE token='${token}'))
+            BEGIN
+                SELECT 'INVALID AUTHORIZATION TOKEN' AS error_message
+            END
+        ELSE
+            BEGIN
+                SELECT TOP 1 * FROM users WHERE id='${user_id}'
+            END
+        `
     }
-
     context.log(querySpec.text);
     try {
         const client = await sql.connect(config);
         const result = await client.query(querySpec.text);
         const records = result.recordset;
         if (records.length < 1) {
-            response(context, { validation:false,message: 'Invalid username/email' });
+            response(context, { error: 'invalid username/email' });
         }
         else {
             const user = records[0];
             let validation = await validatePassword(password, user.password);
-            if (validation) {
-                delete user.password;
-                response(context, { validation, user });
-            } else {
-                response(context, { validation, message:'Password is incorrect' })
-            }
+            delete user.password;
+            // context.log(validation);
+            // context.log(result);
+            response(context,{ user, validation });
         }
         
     } catch (err) {
-        // if (err.message.includes('Violation of UNIQUE KEY constraint'))
-            // response(context, { validation: err.message, message: 'Username or email already taken.'})
+        if (err.message.includes('Violation of UNIQUE KEY constraint'))
+            response(context, {error: err.message,result: 'Username or email already taken.'})
     }
 };
 
 let validatePassword = async (password, dbpassword) => {
-    return await bcrypt.compare(password, dbpassword).then(res => { return res });
+    return await bcrypt.compare(password, dbpassword).then(res => {
+        // context.log(hash);
+        return res;
+    });
 }
-
-let response = async (context, data, code=200) => {
+let response = async (context, data) => {
     sql.close();
     context.log(data);
     context.res = {
-            status: code,
+            status: 200,
             isRaw: true,
             body: data,
             headers: {

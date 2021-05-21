@@ -20,10 +20,10 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
     const querySpec = {
        text:
        `
-       SELECT * FROM Contacts
+       SELECT * FROM Companies
        INNER JOIN Categories
-       ON Contacts.category_id = Categories.id
-       WHERE Contacts.category_id = ${category_id}
+       ON companies.category_id = Categories.id
+       WHERE companies.category_id = ${category_id}
        `,
        values:[category_id]
     }

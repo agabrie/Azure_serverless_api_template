@@ -14,7 +14,8 @@
     "bcrypt": "^5.0.1",
     "durable-functions": "^1.4.6",
     "mssql": "^7.0.0",
-    "pg": "^8.6.0"
+    "sequelize": "^6.6.2",
+    "tedious": "^11.0.8"
   },
   "devDependencies": {
     "@azure/functions": "^1.2.3",
