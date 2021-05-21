@@ -1,7 +1,7 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions"
+import { User } from "../shared/User";
 const sql = require('mssql');
 const bcrypt = require('bcrypt');
-
 
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
@@ -53,29 +53,30 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
             `,
         // values: [name, email, role_id]
     }
-    context.log(querySpec.text);
-    try {
-        const client = await sql.connect(config);
-        const result = await client.query(querySpec.text);
-        let data = result.recordset[0];
-        if (data.error_message) {
-            response(context, { result: false, message: data.error_message })
-        } else {
-            let user = data;
-            response(context, { result:true, user});
-        }
-        // sql.close();
-        // context.res = {
-        //     status: 200,
-        //     isRaw: true,
-        //     body: result.recordsets[0],
-        //     headers: {
-        //         'Content-Type': 'application/json'
-        //     }
-        // };
-    } catch (err) {
-        context.log(err.message);
-    }
+    User.model.create({first_name:first_name,last_name:last_name,username:username,email:email,password:hash,role:role_id,token:token}); //fix the role association
+    // context.log(querySpec.text);
+    // try {
+    //     const client = await sql.connect(config);
+    //     const result = await client.query(querySpec.text);
+    //     let data = result.recordset[0];
+    //     if (data.error_message) {
+    //         response(context, { result: false, message: data.error_message })
+    //     } else {
+    //         let user = data;
+    //         response(context, { result:true, user});
+    //     }
+    //     // sql.close();
+    //     // context.res = {
+    //     //     status: 200,
+    //     //     isRaw: true,
+    //     //     body: result.recordsets[0],
+    //     //     headers: {
+    //     //         'Content-Type': 'application/json'
+    //     //     }
+    //     // };
+    // } catch (err) {
+    //     context.log(err.message);
+    // }
 };
 let response = async (context, data, code=200) => {
     sql.close();

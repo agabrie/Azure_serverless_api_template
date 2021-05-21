@@ -1,8 +1,7 @@
 import { Sequelize, DataTypes, Model  } from 'sequelize'
-var { getConfig, getSequelize }  = require('../shared/config.js');
-const sequelize = getSequelize();
+var { Role }  = require('../shared/Role.js');
 
-const User = sequelize.define('User', {
+const UserModel = {
   // Model attributes are defined here
   first_name: {
     type: DataTypes.STRING,
@@ -18,11 +17,26 @@ const User = sequelize.define('User', {
   },
   email: {
     type: DataTypes.STRING,
-    allowNull: true
+    allowNull: false
   },
-}, {
-  // Other model options go here
-});
-// sequelize.sync();
+  password: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  token: {
+    type: DataTypes.STRING,
+    allowNull: false
+  }
+}
+// const User = sequelize.define('User', UserModel, {/* Other model options go here*/ });
+var User = {model:null,define:null};
+const define = (sequelizer)=>{
+  // sequelize.sync();
+  User.model = sequelizer.define('User', UserModel, {});
+  User.model.belongsTo(Role.model);
+}
+
+User.define = define;
+
 export { User };
 export default { User };

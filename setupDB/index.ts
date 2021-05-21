@@ -1,10 +1,17 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions"
-var { getConfig, getSequelize }  = require('../shared/config.js');
+var { getConfig, getSequelize } = require('../shared/config.js');
+var { Role }  = require('../shared/Role.js');
+var { User }  = require('../shared/User.js');
 const sequelize = getSequelize();
 const sql = require('mssql');
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
-    const config = getConfig();
+    // const config = getConfig();
+    // console.log(Role)
+    Role.define(sequelize);
+    User.define(sequelize);
+    // console.log(Role)
+    // console.log(Role.model == sequelize.models.Role)
     sequelize.sync();
    const querySpec = {
        text:
@@ -90,31 +97,31 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
         `        
     }
 
-    try {
-        // Create a pool of connections
-        // const pool = new pg.Pool(config);
+    // try {
+    //     // Create a pool of connections
+    //     // const pool = new pg.Pool(config);
 
-        // Get a new client connection from the pool
-        const client = await sql.connect(config);
+    //     // Get a new client connection from the pool
+    //     const client = await sql.connect(config);
 
-        // Execute the query against the client
-        const result = await client.query(querySpec.text);
+    //     // Execute the query against the client
+    //     const result = await client.query(querySpec.text);
 
-        // Release the connection
-        sql.close();
+    //     // Release the connection
+    //     sql.close();
 
-        // Return the query resuls back to the caller as JSON
-        context.res = {
-            status: 200,
-            isRaw: true,
-            body: result.recordsets[0],
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        };
-    } catch (err) {
-        context.log(err.message);
-    }
+    //     // Return the query resuls back to the caller as JSON
+    //     context.res = {
+    //         status: 200,
+    //         isRaw: true,
+    //         body: result.recordsets[0],
+    //         headers: {
+    //             'Content-Type': 'application/json'
+    //         }
+    //     };
+    // } catch (err) {
+    //     context.log(err.message);
+    // }
 
 };
 
