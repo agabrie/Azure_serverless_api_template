@@ -1,20 +1,11 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions"
+import { Op } from 'sequelize';
+var { defineModels, response } = require('../shared/Models');
 
-const sql = require('mssql');
 const bcrypt = require('bcrypt');
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
-    const config = {
-        server: (String)(process.env["dbhost"]),
-        user: (String)(process.env["dbuser"]),
-        password: (String)(process.env["dbpassword"]),
-        database: (String)(process.env["dbname"]),
-        port: (Number)(process.env["dbport"]),
-        options: {
-            encrypt: (Boolean) (process.env["dbencrypt"]),
-            trustServerCertificate: true // change to true for local dev / self-signed certs
-        }
-    };
+
     let token: string = (req.query.token || (req.body && req.body.token));
     let user_id: string = (req.query.user_id || (req.body && req.body.user_id));
 
@@ -33,22 +24,25 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
             END
         `
     }
-    context.log(querySpec.text);
+    // context.log(querySpec.text);
     try {
-        const client = await sql.connect(config);
-        const result = await client.query(querySpec.text);
-        const records = result.recordset;
-        if (records.length < 1) {
-            response(context, { error: 'invalid username/email' });
-        }
-        else {
-            const user = records[0];
-            let validation = await validatePassword(password, user.password);
-            delete user.password;
+        let { User } = await defineModels();
+        let user = await User.model.findByPk(user_id);
+        console.log(user);
+        // const client = await sql.connect(config);
+        // const result = await client.query(querySpec.text);
+        // const records = result.recordset;
+        // if (records.length < 1) {
+            // response(context, { error: 'invalid username/email' });
+        // }
+        // else {
+            // const user = records[0];
+            // let validation = await validatePassword(password, user.password);
+            // delete user.password;
             // context.log(validation);
             // context.log(result);
-            response(context,{ user, validation });
-        }
+            // response(context,{ user, validation });
+        // }
         
     } catch (err) {
         if (err.message.includes('Violation of UNIQUE KEY constraint'))
@@ -62,16 +56,5 @@ let validatePassword = async (password, dbpassword) => {
         return res;
     });
 }
-let response = async (context, data) => {
-    sql.close();
-    context.log(data);
-    context.res = {
-            status: 200,
-            isRaw: true,
-            body: data,
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        };
-}
+
 export default httpTrigger;

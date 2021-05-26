@@ -1,18 +1,27 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions"
-var { getConfig, getSequelize } = require('../shared/config.js');
-var { Role }  = require('../shared/Role.js');
-var { User }  = require('../shared/User.js');
-const sequelize = getSequelize();
-const sql = require('mssql');
+
+var { defineModels, response } = require('../shared/Models.js');
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
-    // const config = getConfig();
-    // console.log(Role)
-    Role.define(sequelize);
-    User.define(sequelize);
-    // console.log(Role)
-    // console.log(Role.model == sequelize.models.Role)
-    sequelize.sync();
+    let { Role, Category, sequelize } = await defineModels();
+    
+    // console.log('setup',User,Role);
+    try {
+
+        await sequelize.sync();
+
+        await Category.model.create({ type: 'Growers' })
+        await Category.model.create({ type: 'Retailers' })
+        await Category.model.create({ type: 'Back-End Office' })
+
+        await Role.model.create({ role_name: 'General Management' })
+        await Role.model.create({ role_name: 'Executive' })
+        await Role.model.create({ role_name: 'Operator' })
+
+        response(context, {result:true,message:'Tables successfully created'});
+    } catch (err) {
+        response(context, {result:false,err:err.message});
+    }
    const querySpec = {
        text:
        `

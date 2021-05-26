@@ -1,18 +1,15 @@
-import { Sequelize, DataTypes, Model  } from 'sequelize'
+import { DataTypes } from 'sequelize'
 
 const RoleModel = {
   role_name: {
     type: DataTypes.STRING,
-    // allowNull: true
+    allowNull: false
   }
 }
-// const User = sequelize.define('User', UserModel, {/* Other model options go here*/ });
-var Role = {model:null,define:null};
-const define = (sequelizer)=>{
-  // sequelize.sync();
-  Role.model = sequelizer.define('Role', RoleModel, {});
+var Role = { model: null, define: null, association: {}};
+const define = async (sequelizer)=>{
+  Role.model = await sequelizer.define('Role', RoleModel, {timestamps: false});
 }
-
 Role.define = define;
 
 export { Role };

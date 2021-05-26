@@ -1,23 +1,18 @@
-import { Sequelize, DataTypes, Model  } from 'sequelize'
-var { Role }  = require('../shared/Role.js');
+import { DataTypes } from 'sequelize'
 
 const UserModel = {
-  // Model attributes are defined here
-  first_name: {
+  full_name: {
     type: DataTypes.STRING,
-    // allowNull: true
-  },
-  last_name: {
-    type: DataTypes.STRING
-    // allowNull defaults to true
   },
   username: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
+    unique: true
   },
   email: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
+    unique: true
   },
   password: {
     type: DataTypes.STRING,
@@ -26,17 +21,30 @@ const UserModel = {
   token: {
     type: DataTypes.STRING,
     allowNull: false
-  }
-}
-// const User = sequelize.define('User', UserModel, {/* Other model options go here*/ });
-var User = {model:null,define:null};
-const define = (sequelizer)=>{
-  // sequelize.sync();
-  User.model = sequelizer.define('User', UserModel, {});
-  User.model.belongsTo(Role.model);
+  },
 }
 
+var User = { model: null, define: null, association: { Role:null }};
+const define = async (sequelizer)=>{
+ 
+  User.model = await sequelizer.define('User', UserModel, {timestamps: false});
+}
 User.define = define;
 
 export { User };
 export default { User };
+
+
+
+/*
+var User = { model: null, define: null, associate: null };
+class UserModel extends Model { }
+const define = async (sequelizer)=>{
+  // sequelize.sync();
+  await UserModel.init(UserObject, {
+    sequelize: sequelizer,
+    modelName: 'user'
+  });
+  User.model = UserModel;
+}
+*/

@@ -1,21 +1,9 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions"
-
-const sql = require('mssql');
+import { Op } from 'sequelize';
+var { defineModels, response } = require('../shared/Models');
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
-    const config = {
-        server: (String)(process.env["dbhost"]),
-        user: (String)(process.env["dbuser"]),
-        password: (String)(process.env["dbpassword"]),
-        database: (String)(process.env["dbname"]),
-        port: (Number)(process.env["dbport"]),
-        options: {
-            // encrypt: true, // for azure
-            encrypt: (Boolean) (process.env["dbencrypt"]),
-            trustServerCertificate: true // change to true for local dev / self-signed certs
-        }
-        // ssl: process.env["ssl"]
-    };
+    
     // context.log('HTTP trigger function processed a request.');
     // const name = (req.query.name || (req.body && req.body.name));
     // const email = (req.query.email || (req.body && req.body.email));
@@ -32,35 +20,41 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
     }
     
     try {
+        const { Company } = await defineModels();
+        let company = await Company.model.create({ name: name, categoryId: category_id }, { include: [Company.association.Category] });
+        let company_find = await Company.model.findByPk(company.id,  { include: [Company.association.Category] })
+        console.log(company);
+        response(context, { company:company_find });
         // Create a pool of connections
         // const pool = new pg.Pool(config);
 
         // Get a new client connection from the pool
-        const client = await sql.connect(config);
+        // const client = await sql.connect(config);
 
         // Execute the query against the client
-        const result = await client.query(querySpec.text);
+        // const result = await client.query(querySpec.text);
 
         // Release the connection
-        sql.close();
+        // sql.close();
 
         // Return the query resuls back to the caller as JSON
-        context.res = {
-            status: 200,
-            isRaw: true,
-            body: result.recordsets[0],
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        };
+        // context.res = {
+        //     status: 200,
+        //     isRaw: true,
+        //     // body: result.recordsets[0],
+        //     headers: {
+        //         'Content-Type': 'application/json'
+        //     }
+        // };
     } catch (err) {
-        context.res = {
-            body: err.message,
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        }
-        context.log(err.message);
+        // context.res = {
+        //     body: err.message,
+        //     headers: {
+        //         'Content-Type': 'application/json'
+        //     }
+        // }
+        // context.log(err.message);
+        response(context, {result:false, err:err.message})
     }
     // const responseMessage = name
     //     ? "Hello, " + name + ". This HTTP triggered function executed successfully."

@@ -1,21 +1,9 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions"
-
-const sql = require('mssql');
+import { Op } from 'sequelize';
+var { defineModels, response } = require('../shared/Models');
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
-    const config = {
-        server: (String)(process.env["dbhost"]),
-        user: (String)(process.env["dbuser"]),
-        password: (String)(process.env["dbpassword"]),
-        database: (String)(process.env["dbname"]),
-        port: (Number)(process.env["dbport"]),
-        options: {
-            // encrypt: true, // for azure
-            encrypt: (Boolean) (process.env["dbencrypt"]),
-            trustServerCertificate: true // change to true for local dev / self-signed certs
-        }
-        // ssl: process.env["ssl"]
-    };
+    
     const category_id:string = req.query.category_id;
     const querySpec = {
        text:
@@ -28,30 +16,45 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
        values:[category_id]
     }
 
+    let { Company } = await defineModels();
+    
     try {
+        let include = Company.association.Category;
+        if (category_id) {
+            include.where = {
+                id: {
+                    [Op.eq]: category_id
+                }
+            }
+        }
+        let companies = await Company.model.findAll({ include: include});
+        console.log('comapnies', companies);
+        response(context, {result:true,companies});
+    
         // Create a pool of connections
         // const pool = new pg.Pool(config);
 
         // Get a new client connection from the pool
-        const client = await sql.connect(config);
+        // const client = await sql.connect(config);
 
         // Execute the query against the client
-        const result = await client.query(querySpec);
+        // const result = await client.query(querySpec);
 
         // Release the connection
-        sql.close();
+        // sql.close();
 
         // Return the query resuls back to the caller as JSON
-        context.res = {
-            status: 200,
-            isRaw: true,
-            body: result.recordsets[0],
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        };
+        // context.res = {
+        //     status: 200,
+        //     isRaw: true,
+        //     // body: result.recordsets[0],
+        //     headers: {
+        //         'Content-Type': 'application/json'
+        //     }
+        // };
     } catch (err) {
-        context.log(err.message);
+        // context.log(err.message);
+        response(context, {result:false,err:err.message});
     }
 
 };
