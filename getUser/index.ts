@@ -6,29 +6,30 @@ const bcrypt = require('bcrypt');
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
 
-    let token: string = (req.query.token || (req.body && req.body.token));
-    let user_id: string = (req.query.user_id || (req.body && req.body.user_id));
+    // let token: string = (req.query.token || (req.body && req.body.token));
+    let user_id: string = (req.query.user_id || (req.params && req.params.user_id));
 
-    let password: string = (req.query.password || (req.body && req.body.password));
+    // let password: string = (req.query.password || (req.body && req.body.password));
 
-   const querySpec = {
-       text:
-        `
-        IF (NOT EXISTS(SELECT * FROM users WHERE token='${token}'))
-            BEGIN
-                SELECT 'INVALID AUTHORIZATION TOKEN' AS error_message
-            END
-        ELSE
-            BEGIN
-                SELECT TOP 1 * FROM users WHERE id='${user_id}'
-            END
-        `
-    }
+//    const querySpec = {
+//        text:
+//         `
+//         IF (NOT EXISTS(SELECT * FROM users WHERE token='${token}'))
+//             BEGIN
+//                 SELECT 'INVALID AUTHORIZATION TOKEN' AS error_message
+//             END
+//         ELSE
+//             BEGIN
+//                 SELECT TOP 1 * FROM users WHERE id='${user_id}'
+//             END
+//         `
+//     }
     // context.log(querySpec.text);
     try {
+        // console.log(req);
         let { User } = await defineModels();
-        let user = await User.model.findByPk(user_id);
-        console.log(user);
+        let user = await User.model.findByPk(user_id,{attributes: {exclude: ['password','token']}, include: [User.association.Role, User.association.Company] });
+        console.log('user',user_id,user);
         // const client = await sql.connect(config);
         // const result = await client.query(querySpec.text);
         // const records = result.recordset;

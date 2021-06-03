@@ -9,10 +9,13 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
        `
        SELECT * FROM Roles
        `,
-       values:[category_id]
+    //    values:[category_id]
     }
 
     try {
+        const { Role } = await defineModels();
+        let roles = await Role.model.findAll();
+        response(context, {roles});
         // Create a pool of connections
         // const pool = new pg.Pool(config);
 
@@ -26,16 +29,16 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
         // sql.close();
 
         // Return the query resuls back to the caller as JSON
-        context.res = {
-            status: 200,
-            isRaw: true,
-            // body: result.recordsets[0],
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        };
+        // context.res = {
+        //     status: 200,
+        //     isRaw: true,
+        //     // body: result.recordsets[0],
+        //     headers: {
+        //         'Content-Type': 'application/json'
+        //     }
+        // };
     } catch (err) {
-        context.log(err.message);
+        // context.log(err.message);
     }
 
 };

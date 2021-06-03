@@ -3,6 +3,7 @@ import { Op } from 'sequelize';
 var { defineModels, response } = require('../shared/Models');
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
+    const company_id: number = (Number)(req.params.company_id);
     
     // const category_id:number = (Number) (req.params.category_id);
     // const querySpec = {
@@ -16,20 +17,23 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
     //    values:[category_id]
     // }
 
-    let { Company } = await defineModels();
+    let { Company, User } = await defineModels();
     
     try {
-        let include = [Company.association.Category, Company.association.User];
+        console.log(Company.association)
+        let user_include = Company.association.User;
+        user_include.include = [User.association.Role];
+        let include = [Company.association.Category, user_include];
         
         // if (category_id && category_id != 3) {
         //     include.where = {
         //         [Op.or]: [{ id: category_id }, {id: 3}]
         //     }
         // }
-        console.log(include);
-        let companies = await Company.model.findAll({include: include});
+        // console.log(include);
+        let company = await Company.model.findByPk(company_id,{include: include});
         // console.log('comapnies', companies);
-        response(context, {result:true,companies});
+        response(context, {result:true,company});
     
         // Create a pool of connections
         // const pool = new pg.Pool(config);

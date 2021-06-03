@@ -8,7 +8,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
     let user_login: string = (req.query.user_login || (req.body && req.body.user_login));
 
     let password: string = (req.query.password || (req.body && req.body.password));
-
+    console.log(user_login);
     
     let { User } = await defineModels();
     try{

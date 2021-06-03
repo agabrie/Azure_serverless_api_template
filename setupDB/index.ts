@@ -9,14 +9,19 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
     try {
 
         await sequelize.sync();
+        await Category.model.findOrCreate({where: { type: 'Growers' }});
+        await Category.model.findOrCreate({where: { type: 'Retailers' }});
+        await Category.model.findOrCreate({where: { type: 'Back-End Office' }});
+        // await Category.model.create({ type: 'Growers' })
+        // await Category.model.create({ type: 'Retailers' })
+        // await Category.model.create({ type: 'Back-End Office' })
 
-        await Category.model.create({ type: 'Growers' })
-        await Category.model.create({ type: 'Retailers' })
-        await Category.model.create({ type: 'Back-End Office' })
-
-        await Role.model.create({ role_name: 'General Management' })
-        await Role.model.create({ role_name: 'Executive' })
-        await Role.model.create({ role_name: 'Operator' })
+        await Role.model.findOrCreate({ where: {role_name: 'General Management' } });
+        await Role.model.findOrCreate({ where: {role_name: 'Executive' } });
+        await Role.model.findOrCreate({ where: {role_name: 'Operator' } });
+        // await Role.model.create({ role_name: 'General Management' })
+        // await Role.model.create({ role_name: 'Executive' })
+        // await Role.model.create({ role_name: 'Operator' })
 
         response(context, {result:true,message:'Tables successfully created'});
     } catch (err) {

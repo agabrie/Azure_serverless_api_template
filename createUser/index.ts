@@ -1,4 +1,5 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions"
+import { isError } from "util";
 var { defineModels,response } = require('../shared/Models');
 const bcrypt = require('bcrypt');
 
@@ -11,6 +12,8 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
     let email: string = (req.query.email || (req.body && req.body.email))|| null;
     let role_id: number =(req.query.role_id || (req.body && req.body.role_id))|| null;
     let password: string = (req.query.password || (req.body && req.body.password))|| null;
+    let company_id: string = (req.query.company_id || (req.body && req.body.company_id))|| null;
+    let category_id: string = (req.query.category_id || (req.body && req.body.category_id))|| null;
 
     let hash:string = await bcrypt.hash(password, 12).then(hash => {return hash;});
 
@@ -18,7 +21,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 
     const contacts: number[] = (req.query.contacts || (req.body && req.body.contacts));
 
-    let { User } = await defineModels();
+    let { User,Contact } = await defineModels();
 
     try {
         let user = await User.model.create({
@@ -27,11 +30,18 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
             email: email,
             password: hash,
             roleId: role_id,
-            token: token
-        }, { include: [User.association.Role]}
+            token: token,
+            categoryId:category_id
+        }, { include: [User.association.Role,User.association.Category]}
         );
+        let contact;
+        if (company_id) {
+            contact = await Contact.model.create({ userId: user.id, companyId: company_id }, {include:[Contact.association.User,Contact.association.Company]});
+        }
         let user_find = await User.model.findByPk(user.id, { include: [User.association.Role]});
-        
+        if (contact) {
+            user_find.contact = contact;
+        }
         response(context,{ result:true, user_find})
     } catch ( err ) {
         response(context,{ result:false, err:err.message });

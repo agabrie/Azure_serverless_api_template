@@ -1,6 +1,11 @@
 import { DataTypes } from 'sequelize'
 
 const ReportModel = {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true // Automatically gets converted to SERIAL for postgres
+  },
   url: {
     type: DataTypes.STRING,
     allowNull: false,

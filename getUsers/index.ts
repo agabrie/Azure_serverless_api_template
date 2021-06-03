@@ -1,49 +1,47 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions"
-
-const sql = require('mssql');
+var { defineModels,response } = require("../shared/Models");
+// var { defineModels }
+// const sql = require('mssql');
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
-    const config = {
-        server: (String)(process.env["dbhost"]),
-        user: (String)(process.env["dbuser"]),
-        password: (String)(process.env["dbpassword"]),
-        database: (String)(process.env["dbname"]),
-        port: (Number)(process.env["dbport"]),
-        options: {
-            // encrypt: true, // for azure
-            encrypt: (Boolean) (process.env["dbencrypt"]),
-            trustServerCertificate: true // change to true for local dev / self-signed certs
-        }
-        // ssl: process.env["ssl"]
-    };
-
-   const querySpec = {
+    const querySpec = {
         text: 'SELECT * FROM users;'
     }
-
+    
     try {
+        const { User, Company, Contact } = await defineModels();
+        let users = await User.model.findAll({
+            attributes: { exclude: ['password', 'token'] },
+            include: [
+                User.association.Role,
+                User.association.Category,
+                User.association.Company
+            ]
+        });
+        response(context, {users});
         // Create a pool of connections
 
         // Get a new client connection from the pool
-        const client = await sql.connect(config);
+        // const client = await sql.connect(config);
 
         // Execute the query against the client
-        const result = await client.query(querySpec);
+        // const result = await client.query(querySpec);
 
         // Release the connection
-        sql.close();
+        // sql.close();
 
         // Return the query resuls back to the caller as JSON
-        context.res = {
-            status: 200,
-            isRaw: true,
-            body: result.recordsets[0],
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        };
+        // context.res = {
+            // status: 200,
+            // isRaw: true,
+            // body: result.recordsets[0],
+            // headers: {
+                // 'Content-Type': 'application/json'
+            // }
+        // };
     } catch (err) {
-        context.log(err.message);
+        response(context, { result: false, err: err.message });
+        // context.log(err.message);
     }
 
 };
