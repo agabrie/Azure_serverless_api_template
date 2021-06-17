@@ -6,7 +6,7 @@ const CategoryModel = {
     allowNull: false
   }
 }
-var Category = { model: null, define: null, association: {}};
+var Category = { model: null, define: null, association: {}, name:'Category'};
 const define = async (sequelizer)=>{
   Category.model = await sequelizer.define('Category', CategoryModel, {timestamps: false});
 }

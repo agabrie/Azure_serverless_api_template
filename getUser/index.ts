@@ -28,8 +28,9 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
     try {
         // console.log(req);
         let { User } = await defineModels();
-        let user = await User.model.findByPk(user_id,{attributes: {exclude: ['password','token']}, include: [User.association.Role, User.association.Company] });
-        console.log('user',user_id,user);
+        let user = await User.model.findByPk(user_id,{attributes: {exclude: ['password','token']}, include: [User.association.Role, User.association.Company,User.association.Category] });
+        // console.log('user', user_id, user);
+        response(context, {reponse:true,user})
         // const client = await sql.connect(config);
         // const result = await client.query(querySpec.text);
         // const records = result.recordset;

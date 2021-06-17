@@ -7,7 +7,7 @@ const ContactModel = {
 		autoIncrement: true // Automatically gets converted to SERIAL for postgres
   }
 }
-var Contact = { model: null, define: null, association: {}};
+var Contact = { model: null, define: null, association: {},name:'Contact'};
 const define = async (sequelizer)=>{
 	Contact.model = await sequelizer.define('Contact', ContactModel, {timestamps: false});
 }

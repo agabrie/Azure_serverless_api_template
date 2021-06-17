@@ -6,7 +6,7 @@ const RoleModel = {
     allowNull: false
   }
 }
-var Role = { model: null, define: null, association: {}};
+var Role = { model: null, define: null, association: {}, name:'Role'};
 const define = async (sequelizer)=>{
   Role.model = await sequelizer.define('Role', RoleModel, {timestamps: false});
 }

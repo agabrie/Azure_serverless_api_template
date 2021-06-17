@@ -11,7 +11,8 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
     // const { name } = req.body || req.query;
     let name: string = (req.query.name || (req.body && req.body.name));
     let category_id: string = (req.query.category_id || (req.body && req.body.category_id));
-
+    let contact_name:string = (req.query.contact_name || (req.body && req.body.contact_name));
+    let contact_email:string = (req.query.contact_email || (req.body && req.body.contact_email));
     // context.log(req.body,req.query);
     // const contacts = req.body;
     const querySpec = {
@@ -21,7 +22,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
     
     try {
         const { Company } = await defineModels();
-        let company = await Company.model.create({ name: name, categoryId: category_id }, { include: [Company.association.Category] });
+        let company = await Company.model.create({ name: name, categoryId: category_id, contact_name:contact_name,contact_email:contact_email }, { include: [Company.association.Category] });
         let company_find = await Company.model.findByPk(company.id,  { include: [Company.association.Category] })
         console.log(company);
         response(context, { company:company_find });

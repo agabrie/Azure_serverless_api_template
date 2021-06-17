@@ -1,0 +1,18 @@
+{
+  "bindings": [
+    {
+			"authLevel": "anonymous",
+			"type": "httpTrigger",
+			"direction": "in",
+			"name": "req",
+			"route": "azure/access",
+			"methods": ["get"]
+		},
+    {
+      "type": "http",
+      "direction": "out",
+      "name": "res"
+    }
+  ],
+  "scriptFile": "../dist/getAzureAccess/index.js"
+}

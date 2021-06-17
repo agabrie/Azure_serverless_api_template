@@ -4,45 +4,44 @@ var { defineModels, response } = require('../shared/Models');
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
     
-    const category_id:number = (Number) (req.params.category_id);
-    const querySpec = {
-       text:
-       `
-       SELECT * FROM Companies
-       INNER JOIN Categories
-       ON companies.category_id = Categories.id
-       WHERE companies.category_id = ${category_id}
-       `,
-       values:[category_id]
-    }
-
-    let { Company, User, Contact } = await defineModels();
+    // const category_id:number = (Number) (req.params.category_id);
+    // const querySpec = {
+    //    text:
+    //    `
+    //    SELECT * FROM Companies
+    //    INNER JOIN Categories
+    //    ON companies.category_id = Categories.id
+    //    WHERE companies.category_id = ${category_id}
+    //    `,
+    //    values:[category_id]
+    // }
+    const category_id:number|string = req.params.category_id;
+    console.log(category_id);
+    let { Company } = await defineModels();
     
     try {
-        let category_include = Company.association.Category;
-        let user_include = Company.association.User;
-        if (category_id) {
-            // if (category_id != 3) {
-                category_include.where = {
-                    id: category_id
-                    // [Op.or]: [{ id: category_id }, {id: 3}]
-                }
-            // }
-        }
+        let include = Company.association.Category;
+        
         // if (category_id && category_id != 3) {
         //     include.where = {
         //         [Op.or]: [{ id: category_id }, {id: 3}]
         //     }
         // }
-        console.log(category_include);
+        // console.log(include);
+        if (category_id && category_id != 'all') {
+            // if (category_id != 3) {
+                include.where = {
+                    id: category_id
+                    // [Op.or]: [{ id: category_id }, {id: 3}]
+                }
+            // }
+        }
         let companies = await Company.model.findAll({
-            include: [
-                category_include,
-                // user_include
-            ]
+            // attributes: { exclude: ['users'] },
+            
+            include: include
         });
         // console.log('comapnies', companies);
-        console.log("companies",companies);
         response(context, {result:true,companies});
     
         // Create a pool of connections

@@ -1,6 +1,8 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions"
+import { User } from "../shared/User";
 
 var { defineModels, response } = require('../shared/Models.js');
+const bcrypt = require('bcrypt');
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
     let { Role, Category, sequelize } = await defineModels();
@@ -12,16 +14,19 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
         await Category.model.findOrCreate({where: { type: 'Growers' }});
         await Category.model.findOrCreate({where: { type: 'Retailers' }});
         await Category.model.findOrCreate({where: { type: 'Back-End Office' }});
-        // await Category.model.create({ type: 'Growers' })
-        // await Category.model.create({ type: 'Retailers' })
-        // await Category.model.create({ type: 'Back-End Office' })
+       
 
         await Role.model.findOrCreate({ where: {role_name: 'General Management' } });
         await Role.model.findOrCreate({ where: {role_name: 'Executive' } });
         await Role.model.findOrCreate({ where: {role_name: 'Operator' } });
-        // await Role.model.create({ role_name: 'General Management' })
-        // await Role.model.create({ role_name: 'Executive' })
-        // await Role.model.create({ role_name: 'Operator' })
+        let username = 'admin';
+        let email = 'admin@naturesmart.com';
+        let password = await bcrypt.hash('admin', 12).then(hash => { return hash; });
+        let token = await bcrypt.hash(email, 12).then(hash => { return hash; });
+        let roleId = 1;
+        let categoryId = 3;
+        await User.model.findOrCreate({ where: {username:username,email:email,roleId:roleId,password:password,token:token, categoryId:categoryId}})
+        
 
         response(context, {result:true,message:'Tables successfully created'});
     } catch (err) {

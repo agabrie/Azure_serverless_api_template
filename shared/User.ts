@@ -24,7 +24,7 @@ const UserModel = {
   },
 }
 
-var User = { model: null, define: null, association: { Role:null }};
+var User = { model: null, define: null, association: { Role: null }, name: 'User'};
 const define = async (sequelizer)=>{
  
   User.model = await sequelizer.define('User', UserModel, {timestamps: false});
