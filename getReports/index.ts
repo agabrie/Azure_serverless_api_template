@@ -49,9 +49,11 @@ const httpTrigger: AzureFunction = async function (
 				id: company_id,
 			};
 		}
-		let reports = await Report.model.findAll({
+		let conditions = {
 			include: [company_include, role_include],
-		});
+		};
+		console.log(conditions)
+		let reports = await Report.model.findAll(conditions);
 		// console.log(reports)
 		// console.log('comapnies', companies);
 		// console.log("companies",companies);

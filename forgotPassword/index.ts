@@ -1,7 +1,9 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions"
+import { encode } from "html-entities";
 import { Op } from 'sequelize';
+import { smtpMail } from "../shared/smtp";
 var { defineModels, response } = require('../shared/Models');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
     
@@ -22,23 +24,39 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
         });
 
         if (!user) {
-            response(context, { validation:false,message: 'Invalid username/email' });
+            response(context, { result:false,message: 'Invalid username/email' });
         }
         else {
-            let message = `${user.username}, Click this link to reset your password : http://192.168.8.117:8081/forgotPassword?user=${user.id}&token=${user.token}`;
+            let url = String(process.env["app-url"]);
 
-            console.log("message",message)
+            // let message = `${user.username}, Click this link to reset your password : http://192.168.8.117:8081/forgotPassword?user=${user.id}&token=${user.token}`;
+            smtpMail(
+							user.email,
+							"Password Reset Requested",
+							`Good Day ${user.name}, click the button below to reset your password`,
+							`${user.username},<br />
+                Click <a href='${url}/resetPassword?user=${
+								user.id
+							}&token=${encode(
+								user.token
+							)}'> here </a> to reset your password. <br />
+                Or click this link <br />
+                ${url}/resetPassword?user=${user.id}&token=${encode(
+								user.token
+							)}`
+						);
+            // console.log("message",message)
             // let validation = await validatePassword(password, user.password);
             // if (validation) {
             //     delete user.password;
-                response(context, { message });
+                response(context, {result:true, message:'email sent with instructions to reset password' });
             // } else {
                 // response(context, { validation, message:'Password is incorrect' })
             // }
         }
         
     } catch (err) {
-            response(context, { result:false,err: err.message})
+            response(context, { result:false,message: err.message})
     }
 };
 

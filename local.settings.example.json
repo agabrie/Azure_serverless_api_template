@@ -1,0 +1,23 @@
+{
+	"IsEncrypted": false,
+	"Values": {
+		"AzureWebJobsStorage": "",
+		"FUNCTIONS_WORKER_RUNTIME": "node",
+		"dbhost": "",
+		"dbuser": "",
+		"dbpassword": "",
+		"dbname": "",
+		"dbport": "",
+		"dbencrypt": "true",
+
+		"pbi-tenant-id": "",
+		"pbi-client-id": "",
+		"pbi-secret": "",
+		"pbi-username": "",
+		"pbi-password": ""
+	},
+	"Host": {
+		"LocalHttpPort": "7071",
+		"CORS": "*"
+	}
+}

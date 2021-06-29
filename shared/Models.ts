@@ -10,7 +10,7 @@ var { ReportRole } = require("./ReportRole.js");
 var { ReportCompany } = require("./ReportCompany.js");
 
 var { getSequelize } = require('../shared/config.js');
-const sequelize = getSequelize();
+// const sequelize = getSequelize();
 
 const belongsTo = async (a, b, foreignKeyID, foreignKeyName) => {
 	await a.model.belongsTo(b.model, { as: foreignKeyName, foreignKey: foreignKeyID })
@@ -40,6 +40,37 @@ const oneToMany = async (modelA, modelB, foreignKeyID, foreignKeyName) => {
 	modelB.association[modelA.name] = await hasMany(modelB, modelA, foreignKeyID, foreignKeyName);
 	// console.log(modelA,modelB)
 }
+function getAllExcluded(arrayA, arrayB, value) {
+	let excluded = arrayA.filter((a) => !arrayB.some((b) => a[value] == b[value]));
+	return excluded;
+}
+
+function getAllNew(arrayA, arrayB, value){
+	let nu = arrayB.filter((b) => !arrayA.some((a) => b[value] == a[value]));
+	return nu;
+}
+
+async function updateAssociationArray(oldArray, newArray, fdelete, fnew) {
+	// let nu = , toDelete = [];
+	if (!oldArray) {
+		oldArray = []
+	}
+	if (!newArray) {
+		newArray = []
+	}
+	let nu = getAllNew(oldArray, newArray, 'id')
+	let toDelete = getAllExcluded(oldArray, newArray, 'id')
+	console.log("old",oldArray)
+	console.log("updated",newArray);
+	console.log("new",nu);
+	console.log("to Delete",toDelete);
+	for await (const contents of toDelete.map(async elem => await fdelete(elem))) {
+		// console.log(contents)
+	}
+	await nu.forEach(async elem => {
+		await fnew(elem);
+	});
+}
 
 const defineModels = async (sequelizer = null) => {
 	if (sequelizer == null)
@@ -61,6 +92,7 @@ const defineModels = async (sequelizer = null) => {
 	await manyToMany(Company,User, Contact, 'company', 'user');
 	await manyToMany(Report, Role, ReportRole, 'report', 'role');
 	await manyToMany(Report, Company, ReportCompany, 'report', 'company');
+	await oneToMany(Report, Category, "categoryId", "category");
 	
 	// console.log(Company.association, Category.association)
 	// Company.association.Category = await belongsTo(Company,Category, 'categoryId', 'category');
@@ -136,5 +168,5 @@ const response = async (context, data, code=200) => {
             }
         };
 }
-export default {defineModels, response}
-export {defineModels,response}
+export default {defineModels, response, updateAssociationArray}
+export {defineModels,response, updateAssociationArray}

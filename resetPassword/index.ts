@@ -1,7 +1,7 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions"
 import { Op } from 'sequelize';
 var { defineModels, response } = require('../shared/Models');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
     
@@ -39,7 +39,8 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
                 let hash:string = await bcrypt.hash(password, 12).then(hash => {return hash;});
                 user.password = hash;
                 await user.save();
-                console.log('after',user.password)
+                console.log('after', user.password)
+                response(context, {result:true,message:"password successfully reset"})
             //     delete user.password;
                 // response(context, { message });
             } else {

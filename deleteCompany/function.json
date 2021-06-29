@@ -1,0 +1,18 @@
+{
+  "bindings": [
+    {
+			"authLevel": "anonymous",
+			"type": "httpTrigger",
+			"direction": "in",
+			"name": "req",
+			"route": "companies/delete",
+			"methods": ["post"]
+		},
+    {
+      "type": "http",
+      "direction": "out",
+      "name": "res"
+    }
+  ],
+  "scriptFile": "../dist/deleteCompany/index.js"
+}

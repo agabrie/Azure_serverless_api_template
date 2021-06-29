@@ -1,4 +1,5 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions"
+import { resolve } from "path/posix";
 // import axios from "axios";
 import { Op } from 'sequelize';
 var { defineModels, response } = require('../shared/Models');
@@ -28,24 +29,35 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
             "Content-Type": "application/json",
             // "Content-Type": "application/x-www-form-urlencoded"
         };
+        var access_token = null;
         // let access_token = await axios.post(url, formData, { headers, params: formData });
-        let token = await request.post(
-            {
-                url: url,
-                form: formData,
-                headers: headers
-            }
-            ,
-            async (err, result, body) => {
-                // access_token = result;
-                console.log(result.body);
-                let jsonResponse = JSON.parse(result);
-                console.log(jsonResponse.body.access_token);
-                // return await JSON.parse(result);
-            }
-        )
-        // console.log(access_token)
-        // response(context, {result:true, access_token});
+        let requestReponse:any = await new Promise(async (resolve, reject) => {
+
+            await request.post(
+                {
+                    url: url,
+                    form: formData,
+                    headers: headers
+                }
+                ,
+                async (err, result, body) => {
+                    let jsonResponse = JSON.parse(result.body);
+                    access_token = await jsonResponse.access_token;
+                    if (err) {
+                        reject(err);
+                    }
+                    resolve(jsonResponse);
+                }
+                )
+            });
+        console.log(requestReponse)
+        if (requestReponse && requestReponse.access_token) {
+            let access_token = requestReponse.access_token;
+            response(context, { result: true, access_token });
+        }
+        else {
+            throw 'No access token returned'
+        }
     } catch (err) {
         console.log(err)
         response(context, {result:false,err:err.message, error:err});

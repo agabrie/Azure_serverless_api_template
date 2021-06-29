@@ -2,7 +2,7 @@ import { AzureFunction, Context, HttpRequest } from "@azure/functions"
 import { Op } from 'sequelize';
 var { defineModels, response } = require('../shared/Models');
 
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
 

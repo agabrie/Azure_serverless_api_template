@@ -1,7 +1,7 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions"
 import { Op } from 'sequelize';
 var { defineModels, response } = require('../shared/Models');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
     
@@ -40,6 +40,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 };
 
 let validatePassword = async (password, dbpassword) => {
+    if (!password || password == '') { return false}
     return await bcrypt.compare(password, dbpassword).then(res => { return res });
 }
 

@@ -16,7 +16,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
     let description: string = (req.query.description || (req.body && req.body.description)) || null;
     let report_id: string = (req.query.report_id || (req.body && req.body.report_id)) || null;
     let workspace_id: string = (req.query.workspace_id || (req.body && req.body.workspace_id)) || null;
-
+    let category_id: number = Number(req.query.category_id || (req.body && req.body.category_id))||null;
     // console.log(req.body);
     // const querySpec = {
     //    text:
@@ -29,26 +29,28 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
     try {
         let { Report, ReportCompany,ReportRole } = await defineModels();
         let reports = [];
-        if (companies.length > 0 && roles.length > 0) {
+        // if (companies.length > 0 && roles.length > 0) {
             // companies.forEach(async company => {
                 // console.log(company);
-            let report = await Report.model.findOrCreate({
-                where: {
-                    name: name,
-                    // roleId: role_id,
-                    // companyId: company.id,
-                    url: url,
-                    workspaceId: workspace_id,
-                    reportId: report_id,
-                    description: description
-                }
-            });
+        let conditions = {
+					where: {
+						name: name,
+						// roleId: role_id,
+						// companyId: company.id,
+						url: url,
+						workspaceId: workspace_id,
+						reportId: report_id,
+						description: description,
+						categoryId: category_id,
+					},
+				};
+            let report = await Report.model.findOrCreate(conditions);
             report = report[0];
             console.log(report)
-            companies.forEach(async company => {
+            await companies.forEach(async company => {
                 await ReportCompany.model.findOrCreate({ where: { reportId: report.id, companyId: company.id }})
             });
-            roles.forEach(async role => {
+            await roles.forEach(async role => {
                 await ReportRole.model.findOrCreate({where: { reportId: report.id, roleId: role.id }})
             });
                 // reports.push(report)
@@ -62,12 +64,14 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
                 ]
             })
             response(context, { reports })
-        } else {
+        // } else {
 
-            response(context, {
-                err: 'Invalid data'
-            })
-        }
+        //     response(context, {
+        //         err: 'Invalid data'
+        //     })
+        // }
+
+        
         // Create a pool of connections
         // const pool = new pg.Pool(config);
 

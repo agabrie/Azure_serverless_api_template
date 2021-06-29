@@ -31,10 +31,11 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
                     // Report.association.Company
                 // ]
             // })
-        let report = await Report.model.findByPk({
+        let report = await Report.model.findByPk(report_id,{
             include: [
                 Report.association.Company,
-                    Report.association.Role,
+                Report.association.Role,
+                    Report.association.Category
 
                 // category_include,
                 // user_include
