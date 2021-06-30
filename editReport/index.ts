@@ -23,13 +23,16 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 
 	try {
 		let { Report, ReportCompany,ReportRole } = await defineModels();
-		let report = null;
-			report = await Report.model.findByPk(id, {
+		// let report = null;
+			let report = await Report.model.findByPk(id, {
 				include: [
 					Report.association.Role,
 					Report.association.Company
 				]
 			})
+		if (!report) {
+			throw {message:"report not found"}
+		}
 		if (name!=null && name != report.name) {
 			report.name = name;
 		}

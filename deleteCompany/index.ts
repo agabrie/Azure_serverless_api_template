@@ -7,8 +7,13 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 			req.query.company_id || (req.body && req.body.company_id) || null;
   
     try {
-        const { Company } = await defineModels();
+        const { Company,Contact } = await defineModels();
         let company = await Company.model.findByPk(company_id);
+        let contacts = await Contact.model.findAll({ where: {companyId:company_id}});
+        // console.log(contacts)
+        contacts.forEach(contact => {
+            contact.destroy();
+        });
         await company.destroy();
         response(context, {result:true,message:'Company successfully removed'});
         // Create a pool of connections

@@ -4,10 +4,17 @@ var { defineModels, response } = require('../shared/Models');
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
     let user_id: number =req.query.user_id || (req.body && req.body.user_id) || null;
-  
+    console.log(user_id)
     try {
-        const { User } = await defineModels();
+        const { User, Contact } = await defineModels();
+
+        let contacts = await Contact.model.findAll({ where: {userId:user_id}});
+        // console.log(contacts)
+        contacts.forEach(contact => {
+            contact.destroy();
+        });
         let user = await User.model.findByPk(user_id);
+        // console.log(user)
         await user.destroy();
         response(context, {result:true,message:'user successfully removed'});
         // Create a pool of connections

@@ -1,6 +1,5 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions"
-// import { isError } from "util";
-// import { sendMail } from "../shared/mail";
+
 import { smtpMail } from "../shared/smtp";
 import { encode } from "html-entities";
 var { defineModels,response } = require('../shared/Models');

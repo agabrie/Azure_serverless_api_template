@@ -63,7 +63,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
                     Report.association.Company
                 ]
             })
-            response(context, { reports })
+            response(context, {result:true, reports })
         // } else {
 
         //     response(context, {
