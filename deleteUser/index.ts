@@ -1,52 +1,28 @@
-import { AzureFunction, Context, HttpRequest } from "@azure/functions"
-// import { Op } from 'sequelize';
-var { defineModels, response } = require('../shared/Models');
+import { AzureFunction, Context, HttpRequest } from "@azure/functions";
+var { defineModels, response } = require("../shared/Models");
 
-const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
-    let user_id: number =req.query.user_id || (req.body && req.body.user_id) || null;
-    console.log(user_id)
-    try {
-        const { User, Contact } = await defineModels();
+const httpTrigger: AzureFunction = async function ( context: Context, req: HttpRequest ): Promise<void> {
+	let user_id: number =
+		req.query.user_id || (req.body && req.body.user_id) || null;
+	console.log(user_id);
+	try {
+		const { User, Contact } = await defineModels();
 
-        let contacts = await Contact.model.findAll({ where: {userId:user_id}});
-        // console.log(contacts)
-        contacts.forEach(contact => {
-            contact.destroy();
-        });
-        let user = await User.model.findByPk(user_id);
-        // console.log(user)
-        await user.destroy();
-        response(context, {result:true,message:'user successfully removed'});
-        // Create a pool of connections
-        // const pool = new pg.Pool(config);
+		let contacts = await Contact.model.findAll({ where: { userId: user_id } });
 
-        // Get a new client connection from the pool
-        // const client = await sql.connect(config);
+		contacts.forEach((contact) => {
+			contact.destroy();
+		});
+		let user = await User.model.findByPk(user_id);
 
-        // Execute the query against the client
-        // const result = await client.query(querySpec.text);
-
-        // Release the connection
-        // sql.close();
-
-        // Return the query resuls back to the caller as JSON
-        // context.res = {
-        //     status: 200,
-        //     isRaw: true,
-        //     // body: result.recordsets[0],
-        //     headers: {
-        //         'Content-Type': 'application/json'
-        //     }
-        // };
-    } catch (err) {
-        response(context, {
-					result: true,
-					message: "removal of user was unsuccessful",
-				});
-
-        // context.log(err.message);
-    }
-
+		await user.destroy();
+		response(context, { result: true, message: "user successfully removed" });
+	} catch (err) {
+		response(context, {
+			result: true,
+			message: "removal of user was unsuccessful",
+		});
+	}
 };
 
 export default httpTrigger;

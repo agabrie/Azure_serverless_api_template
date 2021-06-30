@@ -16,27 +16,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
         });
         await company.destroy();
         response(context, {result:true,message:'Company successfully removed'});
-        // Create a pool of connections
-        // const pool = new pg.Pool(config);
-
-        // Get a new client connection from the pool
-        // const client = await sql.connect(config);
-
-        // Execute the query against the client
-        // const result = await client.query(querySpec.text);
-
-        // Release the connection
-        // sql.close();
-
-        // Return the query resuls back to the caller as JSON
-        // context.res = {
-        //     status: 200,
-        //     isRaw: true,
-        //     // body: result.recordsets[0],
-        //     headers: {
-        //         'Content-Type': 'application/json'
-        //     }
-        // };
+        
     } catch (err) {
         response(context, {
 					result: true,

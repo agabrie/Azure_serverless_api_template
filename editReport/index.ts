@@ -1,8 +1,4 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions"
-// import { report } from "process";
-// import { Op } from 'sequelize';
-// import { Company } from "../shared/Company";
-// import { ReportCompany } from "../shared/ReportCompany";
 var { defineModels, response, updateAssociationArray } = require('../shared/Models');
 
 // const sql = require('mssql');
@@ -10,7 +6,6 @@ var { defineModels, response, updateAssociationArray } = require('../shared/Mode
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
 	
 	let id: number = (req.query.id || (req.body && req.body.id)) || null;
-	// let role_id: number = (req.query.role_id || (req.body && req.body.role_id)) || null;
 	let name: number = (req.query.name || (req.body && req.body.name)) || null;
 	let companies: any[] = (req.query.companies || (req.body && req.body.companies)) || null;
 	let roles: any[] = (req.query.roles || (req.body && req.body.roles)) || null;
@@ -23,13 +18,12 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 
 	try {
 		let { Report, ReportCompany,ReportRole } = await defineModels();
-		// let report = null;
-			let report = await Report.model.findByPk(id, {
-				include: [
-					Report.association.Role,
-					Report.association.Company
-				]
-			})
+		let report = await Report.model.findByPk(id, {
+			include: [
+				Report.association.Role,
+				Report.association.Company
+			]
+		})
 		if (!report) {
 			throw {message:"report not found"}
 		}
@@ -72,30 +66,9 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 			}
 		);
 
-		// let nuRoles = getAllNew(report.Roles,roles,'id')
-		// let rolesToDelete = getAllExcluded(report.Roles,roles,'id')
-		// console.log("new", nuRoles)
-		// console.log("to Delete",rolesToDelete)
-		
-		// await rolesToDelete.forEach(async role => {
-		//     let roleRecord = await ReportRole.model.findOne({ where: { roleId: role.id, reportId: report.id } })
-		//     await roleRecord.destroy();
-		// });
-		// await nuRoles.forEach(async role => {
-		//     console.log('Role to Add =>', { role })
-		//     await ReportRole.model.findOrCreate({where: { reportId: report.id, roleId: role.id }})
-		// });
-
 		await report.save();
-
-		// let reportEdit = await Report.model.findByPk(report.id, {
-		// 		include: [
-		// 			Report.association.Role,
-		// 			Report.association.Company
-		// 		]
-		// })
 		await report.reload();
-		// console.log(report.description,reportEdit.description)
+
 		response(context, {result:true, report })
 		
 	} catch (err) {
